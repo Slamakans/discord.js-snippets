@@ -18,16 +18,13 @@ const Canvas = require('canvas');
 
 const async = func => function() {
     return new Promise((resolve, reject) => {
-      func(...arguments, (err, res) => err ? reject(err) : resolve(res));
+      func(!arguments ? undefined : ...arguments, (err, res) => err ? reject(err) : resolve(res));
     })
   };
 
 /* https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=presenceUpdate */
 client.on('presenceUpdate', async (o, n) => {
-  /* It works because streaming will be undefined
-   * if n.user.presence.game is null.
-   */
-  const { streaming } = n.user.presence.game;
+  const { streaming } = n.user.presence.game || {};
   if (!streaming) return;
 
   const start = new Date().getTime();
@@ -35,7 +32,7 @@ client.on('presenceUpdate', async (o, n) => {
   /* Timestamps are stored to prevent spam
    * due to some oddities with the APIs.
    */
-  const timestamps = JSON.parse(await (async(fs.readFile)('./data/timestamps.json', 'utf8')));
+  const timestamps = JSON.parse(await async(fs.readFile)('./data/timestamps.json', 'utf8'));
 
   if (!timestamps[n.id] || start > timestamps[n.id].timestamp + 360 * 6e4) {
     timestamps[n.id] = timestamps[n.id] || {};
