@@ -68,12 +68,26 @@ client.on('presenceUpdate', async (o, n) => { // eslint-disable-line no-undef
       const ctx = canvas.getContext('2d');
       const Image = Canvas.Image;
       const twitchLogo = new Image();
+      const profileBanner = new Image();
+      /* http://i.imgur.com/yht9Iz8m.png */
       twitchLogo.src = path.join(__dirname, './images/twitch.png');
+      if (res.stream.channel.profile_banner) {
+        profileBanner.src = await request({
+          uri: res.stream.channel.profile_banner,
+          encoding: null,
+        });
+      }
 
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.drawImage(twitchLogo, 0, 0, 200, 200);
+
+      if (profileBanner.src) {
+        ctx.globalAlpha = 0.25;
+        ctx.drawImage(profileBanner, 200, 0, 800, 200);
+        ctx.globalAlpha = 1;
+      }
 
       ctx.fillStyle = '#000000';
       ctx.font = '27px Arial';
