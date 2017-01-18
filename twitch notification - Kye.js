@@ -56,7 +56,7 @@ client.on('presenceUpdate', async (o, n) => {
       const res = await request(options);
 
       const status = res.stream.channel.status;
-      const wrapRegex = new RegExp(`.{1, ${44}}`, 'g');
+      const wrapRegex = new RegExp(`.{1,${44}}`, 'g');
       const lines = status.match(wrapRegex) || [];
 
       const wrappedStatus = lines.reduce((tot, cur) =>
