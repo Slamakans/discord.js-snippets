@@ -8,9 +8,12 @@
  * Attaches a presenceUpdate listener that will notify
  * the guilds in common's default channels that a member
  * has started streaming when they do.
+ *
+ * Uses the modules: request-promise, canvas
  */
 const request = require('request-promise');
 const TWITCH_CLIENT_ID = 'your twitch client id here';
+const Canvas = require('canvas');
 
 const async = func => function() {
     return new Promise((resolve, reject) => {
