@@ -36,7 +36,8 @@ client.on('presenceUpdate', async (o, n) => {
    */
   const timestamps = JSON.parse(await (async(fs.readFile)('./data/timestamps.json', 'utf8')));
 
-  if (start > (timestamps[n.id] || { timestamp: +Infinity }).timestamp + 360 * 6e4) {
+  if (!timestamps[n.id] || start > timestamps[n.id].timestamp + 360 * 6e4) {
+    timestamps[n.id] = timestamps[n.id] || { timestamp: start };
     timestamps[n.id].timestamp = start;
     const streamID = n.user.presence.game.url.split('/').slice(3).join();
 
