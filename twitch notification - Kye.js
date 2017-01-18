@@ -11,6 +11,7 @@
  *
  * Uses the modules: request-promise, canvas
  */
+const fs = require('fs');
 const request = require('request-promise');
 const TWITCH_CLIENT_ID = 'your twitch client id here';
 const Canvas = require('canvas');
