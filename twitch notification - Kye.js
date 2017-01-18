@@ -1,135 +1,93 @@
-Client.on('presenceUpdate', (oldmem, newmem) => {
-    if(newmem.user.presence.game === null)return;
-    if(newmem.user.presence.game.streaming === false)return;
+/**
+ * THIS CODE IS NOT PLUG&PLAY READY
+ * The purpose of it is too look at how somebody else
+ * has done it and try to adapt it to your own project.
+ *
+ * Originally created by Kye (189696688657530880)
+ *
+ * Attaches a presenceUpdate listener that will notify
+ * the guilds in common's default channels that a member
+ * has started streaming when they do.
+ */
+const request = require('request-promise');
+const TWITCH_CLIENT_ID = 'your twitch client id here';
 
-    var currentTimeStamp = new Date().getTime();
-    let timestamps = JSON.parse(fs.readFileSync('./data/timestamps.json', 'utf8'));
-    if(!timestamps[newmem.id])
-    {
-        timestamps[newmem.id] = {"timestamp": currentTimeStamp};
-        var streamId = newmem.user.presence.game.url.split("/").slice(3).join();
+const async = func => function() {
+    return new Promise((resolve, reject) => {
+      func(...arguments, (err, res) => err ? reject(err) : resolve(res));
+    })
+  };
 
-        //Create url and headers for api
-        var options = {
-            uri: 'https://api.twitch.tv/kraken/streams/'+ streamId,
-            headers: {
-                'Client-ID': data.keys.twitchClientId
-            },
-            json: true
-        };
-        //Requests api information with options created above
-        request(options).then((res) => {
-            var statusArr = res.stream.channel.status.split("");
-            if(statusArr.length < 44)
-            {
+/* https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=presenceUpdate */
+client.on('presenceUpdate', async (o, n) => {
+  /* It works because streaming will be undefined
+   * if n.user.presence.game is null.
+   */
+  const { streaming } = n.user.presence.game;
+  if (!streaming) return;
 
-            }
-            else if(statusArr.length > 44 && statusArr.length < 88)
-            {
-                statusArr[44] += "-\n";
-            }
-            else if(statusArr.length > 88 && statusArr.length < 132)
-            {
-                statusArr[44] += "-\n";
-                statusArr[88] += "-\n";
-            }
-            else
-            {
-                statusArr[44] += "-\n";
-                statusArr[88] += "-\n";
-                statusArr[132] += "-\n";
-            }
-            var fullStatus = statusArr.join("");
-            let canvas = new Canvas(800, 200);
-            let ctx = canvas.getContext('2d');
-            let Image = Canvas.Image;
-            let twitch = new Image();
-            twitch.src = path.join(__dirname, "./images/twitch.png");
+  const start = new Date().getTime();
 
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
+  /* Timestamps are stored to prevent spam
+   * due to some oddities with the APIs.
+   */
+  const timestamps = JSON.parse(await (async(fs.readFile)('./data/timestamps.json', 'utf8')));
 
-            ctx.drawImage(twitch, 0, 0, 200, 200);
+  if (start > (timestamps[n.id] || { timestamp: +Infinity }).timestamp + 360 * 6e4) {
+    timestamps[n.id].timestamp = start;
+    const streamID = n.user.presence.game.url.split('/').slice(3).join();
 
-            ctx.fillStyle = "#000000";
-            ctx.font='27px Arial';
-            ctx.fillText(res.stream.channel.display_name+', is now live!', 235,50);
+    /* Set url and headers for api */
+    const options = {
+      uri: `https://api.twitch.tv/kraken/streams/${streamID}`,
+      headers: {
+        'Client-ID': TWITCH_CLIENT_ID,
+      },
+      json: true,
+    };
 
-            ctx.fillStyle = "#000000";
-            ctx.font='22px Arial';
-            ctx.fillText(fullStatus, 235,80);
+    /* Requests api information with options created above */
+    try {
+      const res = await request(options);
 
-            ctx.fillStyle = "#565656";
-            ctx.font='22px Arial';
-            ctx.fillText('Playing: '+ res.stream.game, 235,180);
+      const status = res.stream.channel.status;
+      const wrapRegex = new RegExp(`.{1, ${44}}`, 'g');
+      const lines = status.match(wrapRegex) || [];
 
-            newmem.guild.defaultChannel.sendFile(canvas.toBuffer());
-            newmem.guild.defaultChannel.sendMessage("Go check them out! <" + res.stream.channel.url + ">");
-        }).catch(console.log);
+      const wrappedStatus = lines.reduce((tot, cur) =>
+        /\S$/.test(tot) && /^\S/.test(cur)
+          ? `${tot}-\n${cur}`
+          : `${tot.trim()}\n${cur.trim()}`
+      );
+
+      const canvas = new Canvas(800, 200);
+      const ctx = canvas.getContext('2d');
+      const Image = Canvas.Image;
+      const twitchLogo = new Image();
+      twitchLogo.src = path.join(__dirname, './images/twitch.png');
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(twitchLogo, 0, 0, 200, 200);
+
+      ctx.fillStyle = '#000000';
+      ctx.font = '27px Arial';
+      ctx.fillText(`${res.stream.channel.display_name}, is now live!`, 235, 50);
+
+      ctx.font = '22px Arial';
+      ctx.fillText(fullStatus, 235, 80);
+
+      ctx.fillStyle = '#565656';
+      ctx.fillText(`Playing: ${res.stream.game}`, 235, 180);
+
+      await n.guild.defaultChannel.sendFile(
+        canvas.toBuffer(), undefined, `Go check them out! <${res.stream.channel.url}>`
+      );
+    } catch (err) {
+      console.error(err);
     }
+  }
 
-    if(currentTimeStamp > timestamps[newmem.id].timestamp + 21600000)
-    {
-        timestamps[newmem.id].timestamp = currentTimeStamp;
-        var streamId = newmem.user.presence.game.url.split("/").slice(3).join();
-
-        //Create url and headers for api
-        var options = {
-            uri: 'https://api.twitch.tv/kraken/streams/'+ streamId,
-            headers: {
-                'Client-ID': data.keys.twitchClientId
-            },
-            json: true
-        };
-        //Requests api information with options created above
-        request(options).then((res) => {
-            var statusArr = res.stream.channel.status.split("");
-            if(statusArr.length < 44)
-            {
-
-            }
-            else if(statusArr.length > 44 && statusArr.length < 88)
-            {
-                statusArr[44] += "-\n";
-            }
-            else if(statusArr.length > 88 && statusArr.length < 132)
-            {
-                statusArr[44] += "-\n";
-                statusArr[88] += "-\n";
-            }
-            else
-            {
-                statusArr[44] += "-\n";
-                statusArr[88] += "-\n";
-                statusArr[132] += "-\n";
-            }
-            var fullStatus = statusArr.join("");
-            let canvas = new Canvas(800, 200);
-            let ctx = canvas.getContext('2d');
-            let Image = Canvas.Image;
-            let twitch = new Image();
-            twitch.src = path.join(__dirname, "./images/twitch.png");
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-            ctx.drawImage(twitch, 0, 0, 200, 200);
-
-            ctx.fillStyle = "#000000";
-            ctx.font='27px Arial';
-            ctx.fillText(res.stream.channel.display_name+', is now live!', 235,50);
-
-            ctx.fillStyle = "#000000";
-            ctx.font='22px Arial';
-            ctx.fillText(fullStatus, 235,80);
-
-            ctx.fillStyle = "#565656";
-            ctx.font='22px Arial';
-            ctx.fillText('Playing: '+ res.stream.game, 235,180);
-
-            newmem.guild.defaultChannel.sendFile(canvas.toBuffer());
-            newmem.guild.defaultChannel.sendMessage("Go check them out! <" + res.stream.channel.url + ">");
-        }).catch(console.log);
-    }
-    fs.writeFile('./data/timestamps.json', JSON.stringify(timestamps), (err) => {if(err) console.error(err)});
+  fs.writeFile('./data/timestamps.json', JSON.stringify(timestamps), (err) => { if (err) console.error(err); });
 });
