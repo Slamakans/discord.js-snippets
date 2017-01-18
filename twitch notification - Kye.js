@@ -12,18 +12,20 @@
  * Uses the modules: request-promise, canvas
  */
 const fs = require('fs');
+const path = require('path');
 const request = require('request-promise');
-const TWITCH_CLIENT_ID = 'your twitch client id here';
 const Canvas = require('canvas');
 
-const async = func => function() {
-    return new Promise((resolve, reject) => {
-      func(!arguments ? undefined : ...arguments, (err, res) => err ? reject(err) : resolve(res));
-    })
-  };
+const TWITCH_CLIENT_ID = 'your twitch client id here';
+
+const async = func => function(...args) {
+  return new Promise((resolve, reject) => {
+    func(...args, (err, res) => err ? reject(err) : resolve(res));
+  });
+};
 
 /* https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=presenceUpdate */
-client.on('presenceUpdate', async (o, n) => {
+client.on('presenceUpdate', async (o, n) => { // eslint-disable-line no-undef
   const { streaming } = n.user.presence.game || {};
   if (!streaming) return;
 
@@ -34,7 +36,7 @@ client.on('presenceUpdate', async (o, n) => {
    */
   const timestamps = JSON.parse(await async(fs.readFile)('./data/timestamps.json', 'utf8'));
 
-  if (!timestamps[n.id] || start > timestamps[n.id].timestamp + 360 * 6e4) {
+  if (!timestamps[n.id] || start > timestamps[n.id].timestamp + (360 * 6e4)) {
     timestamps[n.id] = timestamps[n.id] || {};
     timestamps[n.id].timestamp = start;
     const streamID = n.user.presence.game.url.split('/').slice(3).join();
@@ -57,9 +59,9 @@ client.on('presenceUpdate', async (o, n) => {
       const lines = status.match(wrapRegex) || [];
 
       const wrappedStatus = lines.reduce((tot, cur) =>
-        /\S$/.test(tot) && /^\S/.test(cur)
-          ? `${tot}-\n${cur}`
-          : `${tot.trim()}\n${cur.trim()}`
+        /\S$/.test(tot) && /^\S/.test(cur) ?
+          `${tot}-\n${cur}` :
+          `${tot.trim()}\n${cur.trim()}`
       );
 
       const canvas = new Canvas(800, 200);
@@ -78,7 +80,7 @@ client.on('presenceUpdate', async (o, n) => {
       ctx.fillText(`${res.stream.channel.display_name}, is now live!`, 235, 50);
 
       ctx.font = '22px Arial';
-      ctx.fillText(fullStatus, 235, 80);
+      ctx.fillText(wrappedStatus, 235, 80);
 
       ctx.fillStyle = '#565656';
       ctx.fillText(`Playing: ${res.stream.game}`, 235, 180);

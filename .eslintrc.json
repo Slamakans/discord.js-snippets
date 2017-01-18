@@ -1,7 +1,7 @@
 {
   "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 2017
   },
   "env": {
     "es6": true,
@@ -72,6 +72,7 @@
     "no-mixed-requires": "error",
     "no-new-require": "error",
     "no-path-concat": "error",
+    "no-console": "off",
 
     "array-bracket-spacing": "error",
     "block-spacing": "error",
@@ -82,7 +83,7 @@
     "computed-property-spacing": "error",
     "consistent-this": ["error", "$this"],
     "eol-last": "error",
-    "func-names": "error",
+    "func-names": "off",
     "func-name-matching": "error",
     "func-style": ["error", "declaration", { "allowArrowFunctions": true }],
     "indent": ["error", 2, { "SwitchCase": 1 }],
