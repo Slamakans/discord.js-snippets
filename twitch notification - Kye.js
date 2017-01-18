@@ -83,11 +83,13 @@ client.on('presenceUpdate', async (o, n) => { // eslint-disable-line no-undef
 
       ctx.drawImage(twitchLogo, 0, 0, 200, 200);
 
-      if (profileBanner.src) {
-        ctx.globalAlpha = 0.25;
+      ctx.globalAlpha = 0.25;
+      try {
         ctx.drawImage(profileBanner, 200, 0, 800, 200);
-        ctx.globalAlpha = 1;
+      } catch (err) {
+        // No profile banner
       }
+      ctx.globalAlpha = 1;
 
       ctx.fillStyle = '#000000';
       ctx.font = '27px Arial';
