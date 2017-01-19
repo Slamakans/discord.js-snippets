@@ -18,11 +18,9 @@ const Canvas = require('canvas');
 
 const TWITCH_CLIENT_ID = 'your twitch client id here';
 
-const async = func => function(...args) {
-  return new Promise((resolve, reject) => {
-    func(...args, (err, res) => err ? reject(err) : resolve(res));
-  });
-};
+const async = func => (...args) => new Promise((resolve, reject) => {
+  func(...args, (err, res) => err ? reject(err) : resolve(res));
+});
 
 /* https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=presenceUpdate */
 client.on('presenceUpdate', async (o, n) => { // eslint-disable-line no-undef
