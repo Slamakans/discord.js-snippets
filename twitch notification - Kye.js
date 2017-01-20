@@ -1,5 +1,5 @@
 /*
- * THIS CODE IS NOT PLUG&PLAY READY
+ * # THIS CODE IS NOT PLUG & PLAY READY #
  * The purpose of it is too look at how somebody else
  * has done it and try to adapt it to your own project.
  *
