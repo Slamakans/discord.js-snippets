@@ -1,4 +1,4 @@
-/**
+/*
  * THIS CODE IS NOT PLUG&PLAY READY
  * The purpose of it is too look at how somebody else
  * has done it and try to adapt it to your own project.
@@ -11,6 +11,7 @@
  *
  * Uses the modules: request-promise, canvas
  */
+
 const fs = require('fs');
 const path = require('path');
 const request = require('request-promise');
