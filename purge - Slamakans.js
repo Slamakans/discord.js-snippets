@@ -30,12 +30,12 @@ module.exports = async message => {
       return [await messages.first().delete()];
     }
 
-    return [await message.channel.bulkDelete(messages)];
+    return (await message.channel.bulkDelete(messages)).array();
   } else {
     if (amount === 0 || amount === 1) {
       return [await message.delete()];
     }
 
-    return [await message.channel.bulkDelete(amount)];
+    return (await message.channel.bulkDelete(amount)).array();
   }
 };
