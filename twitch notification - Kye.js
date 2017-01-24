@@ -1,5 +1,5 @@
-/**
- * THIS CODE IS NOT PLUG&PLAY READY
+/*
+ * # THIS CODE IS NOT PLUG & PLAY READY #
  * The purpose of it is too look at how somebody else
  * has done it and try to adapt it to your own project.
  *
@@ -11,6 +11,7 @@
  *
  * Uses the modules: request-promise, canvas
  */
+
 const fs = require('fs');
 const path = require('path');
 const request = require('request-promise');
@@ -18,11 +19,9 @@ const Canvas = require('canvas');
 
 const TWITCH_CLIENT_ID = 'your twitch client id here';
 
-const async = func => function(...args) {
-  return new Promise((resolve, reject) => {
-    func(...args, (err, res) => err ? reject(err) : resolve(res));
-  });
-};
+const async = func => (...args) => new Promise((resolve, reject) => {
+  func(...args, (err, res) => err ? reject(err) : resolve(res));
+});
 
 /* https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=presenceUpdate */
 client.on('presenceUpdate', async (o, n) => { // eslint-disable-line no-undef
