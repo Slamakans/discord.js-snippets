@@ -7,6 +7,9 @@
  * Can only be used with a proper bot account because of bulkDelete.
  *
  * Syntax: [mention or amount] [amount]
+ *
+ * Resolves with an array of the messages deleted, or Promise<Message> if the command is executed improperly.
+ * # resolve part untested at the moment, functionality should be fine though #
  */
 
 module.exports = async message => {
@@ -17,15 +20,22 @@ module.exports = async message => {
   if (!amount) return message.reply('Specify an amount');
 
   if (user) {
-    const messages = (await message.channel.fetchMessage({ limit: amount })).filter(m => m.author.id === user.id);
+    const messages = (await message.channel.fetchMessage({ limit: amount }))
+      .filter(m => m.author.id === user.id)
+      .filter(m => m.deletable);
 
-    if (messages.size === 1) return messages.deleteAll();
+    if (!message.size) return [];
 
-    return message.channel.bulkDelete(messages);
+    if (messages.size === 1) {
+      return [await messages.first().delete()];
+    }
+
+    return [await message.channel.bulkDelete(messages)];
   } else {
-    if (amount === 0) return message.delete();
+    if (amount === 0 || amount === 1) {
+      return [await message.delete()];
+    }
 
-    if (amount === 1) amount += 1;
-    return message.channel.bulkDelete(amount);
+    return [await message.channel.bulkDelete(amount)];
   }
 };
