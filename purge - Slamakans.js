@@ -20,11 +20,11 @@ module.exports = async message => {
   if (!amount) return message.reply('Specify an amount');
 
   if (user) {
-    const messages = (await message.channel.fetchMessage({ limit: amount }))
+    const messages = (await message.channel.fetchMessages({ limit: amount }))
       .filter(m => m.author.id === user.id)
       .filter(m => m.deletable);
 
-    if (!message.size) return [];
+    if (!messages.size) return [];
 
     if (messages.size === 1) {
       return [await messages.first().delete()];
